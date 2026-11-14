@@ -1,5 +1,6 @@
 import { baseFields, deleteRow, saveRow } from './data'
 import { db } from './db'
+import { requestAchievementCheck } from './push'
 
 /** Setzt oder entfernt das Häkchen einer Gewohnheit für einen Tag. */
 export async function toggleHabitCheck(habitId: string, date: string) {
@@ -16,6 +17,8 @@ export async function toggleHabitCheck(habitId: string, date: string) {
       habit_id: habitId,
       date,
     })
+    // Vielleicht ist damit ein Streak-Meilenstein (7/30/100 Tage) erreicht
+    requestAchievementCheck()
   }
 }
 

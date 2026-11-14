@@ -1,7 +1,8 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Check, LogOut, Monitor, Moon, Pencil, Plus, RefreshCw, Sun, Trash2, X } from 'lucide-react'
+import { Bell, BellRing, Check, LogOut, Monitor, Moon, Pencil, Plus, RefreshCw, Sun, Trash2, X } from 'lucide-react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { describeResult, syncCalendar } from '../lib/calendar'
-import { useState, type FormEvent } from 'react'
+import { disablePush, enablePush, pushEnabled, pushSupported, sendTestPush } from '../lib/push'
 import SyncIndicator, { syncLabel, useSyncStatus } from '../components/SyncIndicator'
 import { useAuth } from '../lib/auth'
 import { baseFields, deleteRow, saveRow, updateRow } from '../lib/data'
@@ -383,6 +384,143 @@ function CalendarSection() {
 }
 
 // ---------------------------------------------------------------------------
+// Benachrichtigungen
+// ---------------------------------------------------------------------------
+type NotifyKey = 'notify_evening' | 'notify_countdown' | 'notify_achievement' | 'notify_weekly'
+
+const NOTIFY_KINDS: { key: NotifyKey; label: string; hint: string }[] = [
+  { key: 'notify_evening', label: 'Abend-Check', hint: 'Täglich um 20 Uhr, nur wenn Gewohnheiten offen sind' },
+  { key: 'notify_countdown', label: 'Countdown', hint: '7 Tage und 1 Tag vor einem Termin, um 9 Uhr' },
+  { key: 'notify_achievement', label: 'Erfolge', hint: 'Sofort bei erreichtem Ziel oder Streak-Meilenstein' },
+  { key: 'notify_weekly', label: 'Wochenrückblick', hint: 'Sonntag um 19 Uhr' },
+]
+
+function NotificationsSection() {
+  const settings = useLiveQuery(async () => (await db().settings.get(db().userId)) ?? null)
+  const [enabled, setEnabled] = useState<boolean | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null)
+
+  useEffect(() => {
+    void pushEnabled().then(setEnabled)
+  }, [])
+
+  async function run(action: () => Promise<string>) {
+    setBusy(true)
+    setMessage(null)
+    try {
+      setMessage({ ok: true, text: await action() })
+    } catch (e) {
+      setMessage({ ok: false, text: e instanceof Error ? e.message : String(e) })
+    } finally {
+      setEnabled(await pushEnabled())
+      setBusy(false)
+    }
+  }
+
+  return (
+    <section className="card space-y-3">
+      <h2 className="font-semibold">Benachrichtigungen</h2>
+
+      {!pushSupported() ? (
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          Dieser Browser unterstützt keine Push-Benachrichtigungen. Am iPhone geht es nur, wenn Momentum zum
+          Home-Bildschirm hinzugefügt wurde.
+        </p>
+      ) : (
+        <>
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            {enabled ? '✅ Auf diesem Gerät aktiviert.' : 'Auf diesem Gerät noch nicht aktiviert.'} Höchstens 2
+            Benachrichtigungen pro Tag.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {enabled ? (
+              <>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  disabled={busy}
+                  onClick={() =>
+                    void run(async () => {
+                      const r = await sendTestPush()
+                      return `Test gesendet an ${r.delivered} von ${r.devices} ${r.devices === 1 ? 'Gerät' : 'Geräten'}.`
+                    })
+                  }
+                >
+                  <BellRing className="h-4 w-4" /> Test senden
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  disabled={busy}
+                  onClick={() =>
+                    void run(async () => {
+                      await disablePush()
+                      return 'Auf diesem Gerät deaktiviert.'
+                    })
+                  }
+                >
+                  Auf diesem Gerät deaktivieren
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={busy || enabled === null}
+                onClick={() =>
+                  void run(async () => {
+                    await enablePush()
+                    return 'Aktiviert. Mit „Test senden“ kannst du es ausprobieren.'
+                  })
+                }
+              >
+                <Bell className="h-4 w-4" /> Auf diesem Gerät aktivieren
+              </button>
+            )}
+          </div>
+        </>
+      )}
+
+      {message && (
+        <p className={`text-sm ${message.ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600'}`}>
+          {message.text}
+        </p>
+      )}
+
+      {settings && (
+        <ul className="divide-y divide-slate-200 dark:divide-slate-800">
+          {NOTIFY_KINDS.map(({ key, label, hint }) => (
+            <li key={key} className="flex items-center justify-between gap-3 py-2">
+              <span className="min-w-0">
+                <span className="block text-sm font-medium">{label}</span>
+                <span className="block text-xs text-slate-500 dark:text-slate-400">{hint}</span>
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={settings[key]}
+                aria-label={label}
+                onClick={() => void updateRow('settings', db().userId, { [key]: !settings[key] })}
+                className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+                  settings[key] ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                    settings[key] ? 'translate-x-5' : ''
+                  }`}
+                />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Konto + Sync
 // ---------------------------------------------------------------------------
 function AccountSection() {
@@ -419,6 +557,7 @@ export default function SettingsPage() {
       <ThemeSection />
       <CategoriesSection />
       <CalendarSection />
+      <NotificationsSection />
       <AccountSection />
     </div>
   )

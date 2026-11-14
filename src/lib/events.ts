@@ -2,6 +2,7 @@ import { deleteRow, updateRow } from './data'
 import { today } from './dates'
 import { db, type Subtask } from './db'
 import { eventProgress } from './progress'
+import { requestAchievementCheck } from './push'
 
 export async function subtasksOf(eventId: string): Promise<Subtask[]> {
   const rows = await db().subtasks.where('event_id').equals(eventId).toArray()
@@ -19,6 +20,7 @@ export async function refreshEventStatus(eventId: string) {
 
   if (complete && event.status === 'active') {
     await updateRow('events', eventId, { status: 'done', completed_at: new Date().toISOString() })
+    if (event.type !== 'appointment') requestAchievementCheck()
   } else if (!complete && event.status === 'done') {
     await updateRow('events', eventId, { status: 'active', completed_at: null })
   }

@@ -28,6 +28,8 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: '/index.html',
+        // Push-Benachrichtigungen anzeigen (public/push-sw.js)
+        importScripts: ['push-sw.js'],
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
       },
     }),

@@ -11,7 +11,9 @@ import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2'
 import { addDays, berlinDate, berlinHour, weekStart } from '../_shared/core.ts'
 import { buildReview, type ReviewData, type ReviewInput } from '../_shared/review.ts'
 
-const REVIEW_HOUR = 19
+// Der Zeitplan läuft um 10 vor der vollen Stunde: der Rückblick entsteht also um 18:50 Uhr,
+// damit die Benachrichtigung „Dein Rückblick ist fertig“ um 19:00 Uhr schon etwas vorfindet.
+const REVIEW_HOUR = 18
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -106,7 +108,7 @@ Deno.serve(async (req) => {
       if (ok !== true) return json({ error: 'Nicht erlaubt' }, 401)
 
       const isSunday = addDays(monday, 6) === today
-      if (!isSunday || berlinHour(now) !== REVIEW_HOUR) return json({ skipped: 'Nicht Sonntag 19 Uhr (Berlin)' })
+      if (!isSunday || berlinHour(now) !== REVIEW_HOUR) return json({ skipped: 'Nicht Sonntagabend (Berlin)' })
 
       const { data: rows, error } = await admin.from('settings').select('user_id')
       if (error) throw new Error(error.message)
