@@ -5,6 +5,8 @@ import Layout from './components/Layout'
 import { useAuth } from './lib/auth'
 import { db } from './lib/db'
 import { applyTheme } from './lib/theme'
+import EventDetailPage from './pages/EventDetail'
+import EventsPage from './pages/Events'
 import Login from './pages/Login'
 import Placeholder from './pages/Placeholder'
 import SettingsPage from './pages/Settings'
@@ -41,16 +43,8 @@ export default function App() {
               />
             }
           />
-          <Route
-            path="ereignisse"
-            element={
-              <Placeholder
-                emoji="🎯"
-                title="Ereignisse"
-                text="Vorhaben, Termine und Sparziele mit Fortschritt. Kommt im nächsten Schritt."
-              />
-            }
-          />
+          <Route path="ereignisse" element={<EventsPage />} />
+          <Route path="ereignisse/:id" element={<EventDetailPage />} />
           <Route
             path="gewohnheiten"
             element={

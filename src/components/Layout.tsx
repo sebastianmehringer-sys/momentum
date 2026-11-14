@@ -16,7 +16,7 @@ const inactive = 'text-slate-500 dark:text-slate-400'
 export default function Layout() {
   const { pathname } = useLocation()
   const title =
-    pathname === '/einstellungen' ? 'Einstellungen' : (AREAS.find((a) => a.to === pathname)?.label ?? 'Momentum')
+    pathname === '/einstellungen' ? 'Einstellungen' : (AREAS.find((a) => (a.to === '/' ? pathname === '/' : pathname.startsWith(a.to)))?.label ?? 'Momentum')
 
   return (
     <div className="md:flex">
