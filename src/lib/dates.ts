@@ -20,6 +20,17 @@ export function daysBetween(a: string, b: string): number {
   return Math.round((utc(b) - utc(a)) / 86_400_000)
 }
 
+/** Datum um n Tage verschieben (n darf negativ sein) */
+export function addDays(s: string, n: number): string {
+  return new Date(utc(s) + n * 86_400_000).toISOString().slice(0, 10)
+}
+
+/** Montag der Woche, in der das Datum liegt (Woche = Mo–So) */
+export function weekStart(s: string): string {
+  const weekday = (new Date(utc(s)).getUTCDay() + 6) % 7 // Mo = 0 … So = 6
+  return addDays(s, -weekday)
+}
+
 /** 2026-11-14 -> 14.11.2026 */
 export function formatDate(s: string): string {
   const [y, m, d] = s.split('-')

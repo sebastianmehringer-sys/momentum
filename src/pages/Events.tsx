@@ -112,7 +112,7 @@ export default function EventsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:px-0">
+      <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:px-0">
         {chip('all', 'Alle')}
         {categories.map((c) => chip(c.id, `${c.emoji} ${c.name}`, c.color))}
         {chip('none', 'Ohne Kategorie')}

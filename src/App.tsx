@@ -7,6 +7,7 @@ import { db } from './lib/db'
 import { applyTheme } from './lib/theme'
 import EventDetailPage from './pages/EventDetail'
 import EventsPage from './pages/Events'
+import HabitsPage from './pages/Habits'
 import Login from './pages/Login'
 import Placeholder from './pages/Placeholder'
 import SettingsPage from './pages/Settings'
@@ -45,12 +46,7 @@ export default function App() {
           />
           <Route path="ereignisse" element={<EventsPage />} />
           <Route path="ereignisse/:id" element={<EventDetailPage />} />
-          <Route
-            path="gewohnheiten"
-            element={
-              <Placeholder emoji="🔁" title="Gewohnheiten" text="Tägliche und wöchentliche Gewohnheiten mit Streaks." />
-            }
-          />
+          <Route path="gewohnheiten" element={<HabitsPage />} />
           <Route
             path="eingang"
             element={<Placeholder emoji="📥" title="Eingang" text="Lose Aufgaben aus der Schnell-Eingabe." />}
