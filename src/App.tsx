@@ -12,6 +12,7 @@ import InboxPage from './pages/Inbox'
 import Login from './pages/Login'
 import Placeholder from './pages/Placeholder'
 import SettingsPage from './pages/Settings'
+import TodayPage from './pages/Today'
 
 /** Übernimmt Hell/Dunkel aus den synchronisierten Einstellungen (z. B. vom anderen Gerät). */
 function ThemeFromSettings() {
@@ -35,16 +36,7 @@ export default function App() {
       <ThemeFromSettings />
       <Routes>
         <Route element={<Layout />}>
-          <Route
-            index
-            element={
-              <Placeholder
-                emoji="🏠"
-                title="Heute"
-                text="Hier siehst du bald Fortschrittsringe, heutige Gewohnheiten, fällige Aufgaben und die nächsten Countdowns."
-              />
-            }
-          />
+          <Route index element={<TodayPage />} />
           <Route path="ereignisse" element={<EventsPage />} />
           <Route path="ereignisse/:id" element={<EventDetailPage />} />
           <Route path="gewohnheiten" element={<HabitsPage />} />

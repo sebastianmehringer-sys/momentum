@@ -78,7 +78,7 @@ export default function Layout() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-3xl px-4 pt-4 pb-24 md:px-8 md:pt-8 md:pb-8">
+        <main className="mx-auto max-w-3xl px-4 pt-4 pb-40 md:px-8 md:pt-8 md:pb-24">
           <h1 className="mb-4 hidden text-2xl font-bold md:block">{title}</h1>
           <Outlet />
         </main>
