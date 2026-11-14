@@ -1,5 +1,10 @@
 /** Datumsangaben sind einfache Texte im Format JJJJ-MM-TT (ohne Uhrzeit, ohne Zeitzone). */
 
+import { daysBetween } from '../../supabase/functions/_shared/core.ts'
+
+// Die Rechenfunktionen teilen sich App und Server
+export { addDays, daysBetween, weekStart } from '../../supabase/functions/_shared/core.ts'
+
 export function toDateString(d: Date): string {
   const m = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
@@ -10,31 +15,16 @@ export function today(): string {
   return toDateString(new Date())
 }
 
-function utc(s: string): number {
-  const [y, m, d] = s.split('-').map(Number)
-  return Date.UTC(y, m - 1, d)
-}
-
-/** Anzahl Tage von a bis b (negativ, wenn b vor a liegt) */
-export function daysBetween(a: string, b: string): number {
-  return Math.round((utc(b) - utc(a)) / 86_400_000)
-}
-
-/** Datum um n Tage verschieben (n darf negativ sein) */
-export function addDays(s: string, n: number): string {
-  return new Date(utc(s) + n * 86_400_000).toISOString().slice(0, 10)
-}
-
-/** Montag der Woche, in der das Datum liegt (Woche = Mo–So) */
-export function weekStart(s: string): string {
-  const weekday = (new Date(utc(s)).getUTCDay() + 6) % 7 // Mo = 0 … So = 6
-  return addDays(s, -weekday)
-}
-
 /** 2026-11-14 -> 14.11.2026 */
 export function formatDate(s: string): string {
   const [y, m, d] = s.split('-')
   return `${d}.${m}.${y}`
+}
+
+/** 2026-11-14 -> 14.11. */
+export function formatDayMonth(s: string): string {
+  const [, m, d] = s.split('-')
+  return `${d}.${m}.`
 }
 
 /** „noch 12 Tage“, „morgen“, „heute“, „vor 3 Tagen“ */

@@ -3,3 +3,6 @@ project_id = "momentum"
 # Die Functions prüfen die Anmeldung selbst (Nutzer-Login bzw. Cron-Geheimnis)
 [functions.sync-calendar]
 verify_jwt = false
+
+[functions.weekly-review]
+verify_jwt = false

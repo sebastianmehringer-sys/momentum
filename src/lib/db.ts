@@ -1,4 +1,7 @@
 import Dexie, { type Table } from 'dexie'
+import type { ReviewData } from '../../supabase/functions/_shared/review.ts'
+
+export type { ReviewData }
 
 // ---------------------------------------------------------------------------
 // Datentypen (entsprechen den Tabellen in supabase/migrations/0001_init.sql)
@@ -83,6 +86,15 @@ export interface Settings extends SyncFields {
   notify_weekly: boolean
 }
 
+/** Wochenrückblick: wird auf dem Server erstellt, die App liest ihn nur */
+export interface WeeklyReview {
+  id: string
+  user_id: string
+  week_start: string
+  data: ReviewData
+  created_at: string
+}
+
 export interface TableMap {
   categories: Category
   events: EventItem
@@ -128,6 +140,7 @@ export class MomentumDB extends Dexie {
   habit_checks!: Table<HabitCheck, string>
   inbox_tasks!: Table<InboxTask, string>
   settings!: Table<Settings, string>
+  weekly_reviews!: Table<WeeklyReview, string>
   outbox!: Table<OutboxEntry, number>
   meta!: Table<MetaEntry, string>
 
@@ -147,6 +160,9 @@ export class MomentumDB extends Dexie {
       settings: 'user_id',
       outbox: '++seq, [table+key]',
       meta: 'key',
+    })
+    this.version(2).stores({
+      weekly_reviews: 'id, week_start',
     })
   }
 }

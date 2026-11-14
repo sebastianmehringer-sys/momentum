@@ -107,6 +107,29 @@ async function pull() {
 }
 
 // ---------------------------------------------------------------------------
+// Wochenrückblicke: entstehen auf dem Server, die App holt sie nur ab
+// ---------------------------------------------------------------------------
+const REVIEW_INTERVAL_MS = 10 * 60_000
+let lastReviewPull = 0
+
+async function pullReviews(force = false) {
+  if (!force && Date.now() - lastReviewPull < REVIEW_INTERVAL_MS) return
+  const { data, error } = await supabase
+    .from('weekly_reviews')
+    .select('*')
+    .order('week_start', { ascending: false })
+    .limit(104)
+  if (error) throw new Error(`weekly_reviews: ${error.message}`)
+  await db().weekly_reviews.bulkPut(data ?? [])
+  lastReviewPull = Date.now()
+}
+
+/** Holt die Rückblicke sofort ab (z. B. direkt nach dem Erstellen). */
+export async function refreshReviews() {
+  await pullReviews(true)
+}
+
+// ---------------------------------------------------------------------------
 // Steuerung
 // ---------------------------------------------------------------------------
 let running = false
@@ -137,6 +160,7 @@ export async function syncNow() {
   try {
     await push()
     await pull()
+    await pullReviews()
     setStatus({ state: 'synced', lastSync: new Date().toISOString() })
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e)
