@@ -1,5 +1,6 @@
 import { House, Inbox, Repeat, Settings, Target, Trophy, type LucideIcon } from 'lucide-react'
 import { NavLink, Outlet, useLocation } from 'react-router'
+import QuickAdd from './QuickAdd'
 import SyncIndicator from './SyncIndicator'
 
 const AREAS: { to: string; label: string; icon: LucideIcon }[] = [
@@ -82,6 +83,8 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+
+      <QuickAdd />
 
       {/* Handy: Leiste unten mit den 5 Bereichen */}
       <nav className="fixed inset-x-0 bottom-0 z-10 grid grid-cols-5 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden dark:border-slate-800 dark:bg-slate-900">

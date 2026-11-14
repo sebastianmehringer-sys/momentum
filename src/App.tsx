@@ -8,6 +8,7 @@ import { applyTheme } from './lib/theme'
 import EventDetailPage from './pages/EventDetail'
 import EventsPage from './pages/Events'
 import HabitsPage from './pages/Habits'
+import InboxPage from './pages/Inbox'
 import Login from './pages/Login'
 import Placeholder from './pages/Placeholder'
 import SettingsPage from './pages/Settings'
@@ -47,10 +48,7 @@ export default function App() {
           <Route path="ereignisse" element={<EventsPage />} />
           <Route path="ereignisse/:id" element={<EventDetailPage />} />
           <Route path="gewohnheiten" element={<HabitsPage />} />
-          <Route
-            path="eingang"
-            element={<Placeholder emoji="📥" title="Eingang" text="Lose Aufgaben aus der Schnell-Eingabe." />}
-          />
+          <Route path="eingang" element={<InboxPage />} />
           <Route
             path="erfolge"
             element={<Placeholder emoji="🏆" title="Erfolge" text="Archiv, Statistik und Wochenrückblicke." />}

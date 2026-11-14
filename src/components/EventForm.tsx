@@ -36,10 +36,15 @@ export default function EventForm({
   event,
   onClose,
   onSaved,
+  title: modalTitle,
+  header,
 }: {
   event?: EventItem
   onClose: () => void
   onSaved?: (id: string) => void
+  /** Eigener Fenstertitel und Inhalt über dem Formular (für die Schnell-Eingabe) */
+  title?: string
+  header?: ReactNode
 }) {
   const categories = useCategories()
   const [title, setTitle] = useState(event?.title ?? '')
@@ -106,7 +111,8 @@ export default function EventForm({
   const fromCalendar = event?.source === 'calendar'
 
   return (
-    <Modal title={event ? 'Ereignis bearbeiten' : 'Neues Ereignis'} onClose={onClose}>
+    <Modal title={modalTitle ?? (event ? 'Ereignis bearbeiten' : 'Neues Ereignis')} onClose={onClose}>
+      {header}
       <form onSubmit={(e) => void submit(e)} className="space-y-4">
         <Label text="Name">
           <input

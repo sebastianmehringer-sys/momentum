@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Check, Minus, Pencil, Plus, Trash2 } from 'lucide-react'
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import Modal from '../components/Modal'
 import { baseFields, saveRow } from '../lib/data'
 import { addDays, today, weekStart } from '../lib/dates'
@@ -15,7 +15,18 @@ const NO_COLOR = '#6366f1'
 // ---------------------------------------------------------------------------
 // Formular
 // ---------------------------------------------------------------------------
-export function HabitForm({ habit, onClose }: { habit?: Habit; onClose: () => void }) {
+export function HabitForm({
+  habit,
+  onClose,
+  title: modalTitle,
+  header,
+}: {
+  habit?: Habit
+  onClose: () => void
+  /** Eigener Fenstertitel und Inhalt über dem Formular (für die Schnell-Eingabe) */
+  title?: string
+  header?: ReactNode
+}) {
   const categories = useCategories()
   const [title, setTitle] = useState(habit?.title ?? '')
   const [categoryId, setCategoryId] = useState(habit?.category_id ?? '')
@@ -50,7 +61,8 @@ export function HabitForm({ habit, onClose }: { habit?: Habit; onClose: () => vo
   )
 
   return (
-    <Modal title={habit ? 'Gewohnheit bearbeiten' : 'Neue Gewohnheit'} onClose={onClose}>
+    <Modal title={modalTitle ?? (habit ? 'Gewohnheit bearbeiten' : 'Neue Gewohnheit')} onClose={onClose}>
+      {header}
       <form onSubmit={(e) => void submit(e)} className="space-y-4">
         <label className="block">
           <span className="mb-1 block text-xs font-medium text-slate-500 dark:text-slate-400">Name</span>
