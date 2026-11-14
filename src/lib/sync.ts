@@ -152,6 +152,12 @@ export async function syncNow() {
   }
 }
 
+/** Wie syncNow, wartet aber, bis ein gerade laufender Abgleich fertig ist. */
+export async function syncAndWait() {
+  while (running) await new Promise((resolve) => setTimeout(resolve, 100))
+  await syncNow()
+}
+
 /** Abgleich kurz verzögert anstoßen (z. B. nach jeder lokalen Änderung). */
 export function requestSync(delay = 800) {
   clearTimeout(timer)

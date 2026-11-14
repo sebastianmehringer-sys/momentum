@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Check, LogOut, Monitor, Moon, Pencil, Plus, Sun, Trash2, X } from 'lucide-react'
+import { Check, LogOut, Monitor, Moon, Pencil, Plus, RefreshCw, Sun, Trash2, X } from 'lucide-react'
+import { describeResult, syncCalendar } from '../lib/calendar'
 import { useState, type FormEvent } from 'react'
 import SyncIndicator, { syncLabel, useSyncStatus } from '../components/SyncIndicator'
 import { useAuth } from '../lib/auth'
@@ -281,6 +282,107 @@ function CategoriesSection() {
 }
 
 // ---------------------------------------------------------------------------
+// Kalender
+// ---------------------------------------------------------------------------
+function CalendarSection() {
+  const settings = useLiveQuery(async () => (await db().settings.get(db().userId)) ?? null)
+  const [url, setUrl] = useState('')
+  const [changing, setChanging] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null)
+
+  if (settings === undefined) return null
+  const connected = Boolean(settings?.ical_url)
+
+  async function run() {
+    setBusy(true)
+    setMessage(null)
+    try {
+      setMessage({ ok: true, text: describeResult(await syncCalendar()) })
+    } catch (e) {
+      setMessage({ ok: false, text: e instanceof Error ? e.message : String(e) })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function save(e: FormEvent) {
+    e.preventDefault()
+    const value = url.trim()
+    if (!value.startsWith('https://calendar.google.com/')) {
+      setMessage({ ok: false, text: 'Die Adresse muss mit https://calendar.google.com/ beginnen.' })
+      return
+    }
+    await updateRow('settings', db().userId, { ical_url: value })
+    setUrl('')
+    setChanging(false)
+    await run()
+  }
+
+  async function remove() {
+    await updateRow('settings', db().userId, { ical_url: null })
+    setMessage({ ok: true, text: 'Kalender getrennt. Bereits übernommene Termine bleiben erhalten.' })
+  }
+
+  return (
+    <section className="card space-y-3">
+      <h2 className="font-semibold">Kalender</h2>
+
+      {connected && !changing ? (
+        <>
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            ✅ Kalender verbunden. Termine werden stündlich automatisch abgeglichen.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" className="btn btn-primary" onClick={() => void run()} disabled={busy}>
+              <RefreshCw className={`h-4 w-4 ${busy ? 'animate-spin' : ''}`} /> Jetzt abgleichen
+            </button>
+            <button type="button" className="btn btn-ghost" onClick={() => setChanging(true)} disabled={busy}>
+              Adresse ändern
+            </button>
+            <button type="button" className="btn btn-ghost" onClick={() => void remove()} disabled={busy}>
+              Trennen
+            </button>
+          </div>
+        </>
+      ) : (
+        <form onSubmit={(e) => void save(e)} className="space-y-3">
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            Füge hier die <strong>geheime Adresse im iCal-Format</strong> deines Google-Kalenders „Fortschritt“ ein. Du
+            findest sie in Google Kalender unter Einstellungen → dein Kalender → „Kalender integrieren“.
+          </p>
+          <input
+            className="input"
+            type="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://calendar.google.com/calendar/ical/…/basic.ics"
+            aria-label="Geheime iCal-Adresse"
+            autoComplete="off"
+          />
+          <div className="flex gap-2">
+            <button type="submit" className="btn btn-primary" disabled={busy || !url.trim()}>
+              Speichern &amp; abgleichen
+            </button>
+            {changing && (
+              <button type="button" className="btn btn-ghost" onClick={() => setChanging(false)}>
+                Abbrechen
+              </button>
+            )}
+          </div>
+        </form>
+      )}
+
+      {message && (
+        <p className={`text-sm ${message.ok ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600'}`}>
+          {message.text}
+        </p>
+      )}
+    </section>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Konto + Sync
 // ---------------------------------------------------------------------------
 function AccountSection() {
@@ -316,6 +418,7 @@ export default function SettingsPage() {
     <div className="space-y-4">
       <ThemeSection />
       <CategoriesSection />
+      <CalendarSection />
       <AccountSection />
     </div>
   )

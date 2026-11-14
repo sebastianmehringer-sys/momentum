@@ -175,6 +175,7 @@ export default function EventDetailPage() {
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
               {TYPE_LABEL[event.type]}
               {category && ` · ${category.emoji} ${category.name}`}
+              {event.source === 'calendar' && ' · aus dem Kalender'}
               {event.status !== 'active' && ' · ✅ Erledigt'}
             </p>
             <h2 className="mt-1 text-xl font-bold break-words">{event.title}</h2>
