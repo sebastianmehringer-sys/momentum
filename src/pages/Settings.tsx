@@ -524,13 +524,13 @@ function NotificationsSection() {
 // Konto + Sync
 // ---------------------------------------------------------------------------
 function AccountSection() {
-  const { session, signOut } = useAuth()
+  const { user, signOut } = useAuth()
   const status = useSyncStatus()
 
   return (
     <section className="card space-y-3">
       <h2 className="font-semibold">Konto &amp; Synchronisierung</h2>
-      <p className="text-sm text-slate-600 dark:text-slate-300">Angemeldet als {session?.user.email}</p>
+      <p className="text-sm text-slate-600 dark:text-slate-300">Angemeldet als {user?.email}</p>
       <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
         <SyncIndicator />
         <div>

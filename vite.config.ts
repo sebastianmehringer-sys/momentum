@@ -5,6 +5,18 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  build: {
+    chunkSizeWarningLimit: 700,
+    rolldownOptions: {
+      output: {
+        // Bibliotheken getrennt vom eigenen Code ausliefern: bei einem App-Update
+        // muss das Gerät dann nur den kleinen eigenen Teil neu laden.
+        codeSplitting: {
+          groups: [{ name: 'vendor', test: /node_modules/ }],
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),

@@ -165,7 +165,9 @@ export async function syncNow() {
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e)
     console.error('Sync fehlgeschlagen:', message)
-    setStatus(navigator.onLine ? { state: 'error', error: message } : { state: 'offline' })
+    // Kein Netz (auch wenn das Gerät sich für „online“ hält, z. B. schwaches WLAN) ist kein Fehler
+    const noNetwork = !navigator.onLine || /failed to fetch|networkerror|load failed|network request failed/i.test(message)
+    setStatus(noNetwork ? { state: 'offline' } : { state: 'error', error: message })
   } finally {
     running = false
     await refreshPending()
